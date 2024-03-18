@@ -10,8 +10,18 @@ inPort::inPort(double prob, int index, double maxArrivalTime):
     maxArrivalTime(maxArrivalTime)
 {}
 
-vector<pair<int, double>> &inPort::simulateArrivals() {
+vector<pair<int, double>> inPort::simulateArrivals() {
+    random_device rd;
+    mt19937 gen(rd());
     exponential_distribution<> exp(1/prob);
+    double accumulatedTime = exp(gen);
+    vector<pair<int, double>> portArrivalQueue;
 
+    while(accumulatedTime <= maxArrivalTime) {
+        pair<int, double> frame(index, accumulatedTime);
+        portArrivalQueue.push_back(frame);
+        accumulatedTime += exp(gen);
+    }
 
+    return portArrivalQueue;
 }

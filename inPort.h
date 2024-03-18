@@ -17,7 +17,7 @@ class inPort {
 
 public:
     inPort(double prob, int index,double maxArrivalTime);
-    vector<pair<int, double>>& simulateArrivals();
+    vector<pair<int, double>> simulateArrivals();
 };
 
 
