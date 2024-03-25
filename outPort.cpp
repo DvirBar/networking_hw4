@@ -10,6 +10,7 @@ outPort::outPort(int id, double prob):
     prob(prob),
     queue(),
     deliveredPackets(0),
+    timeInService(0),
     droppedPackets(0),
     totalWaitTime(0),
     totalServiceTime(0)
@@ -25,12 +26,34 @@ void outPort::insertPacket(double arrivalTime) {
     deliveredPackets++;
 }
 
-double outPort::deliverPackets(double interval) {
-    if(currServiceTimeLeft == -1) {
-        random_device rd;
-        mt19937 gen(rd());
-        exponential_distribution<> exp(1/prob);
-        currServiceTimeLeft = exp(gen);
+double outPort::deliverPackets(double intervalStart, double intervalEnd) {
+    random_device rd;
+    mt19937 gen(rd());
+    exponential_distribution<> exp(1/prob);
+    double currIntervalTime = 0;
+    double interval = intervalEnd - intervalStart;
+    double lastServiceTimeLeft = 0;
+
+    while(currIntervalTime < interval && !queue.empty()) {
+        if(currServiceTimeLeft == -1) {
+            currServiceTimeLeft = exp(gen);
+        }
+
+        if(currServiceTimeLeft <= interval - currIntervalTime) {
+            currIntervalTime += currServiceTimeLeft;
+            lastServiceTimeLeft = currServiceTimeLeft;
+            currServiceTimeLeft = -1;
+            totalWaitTime += intervalStart + currIntervalTime - queue.front();
+            totalServiceTime += currServiceTimeLeft + timeInService;
+            queue.pop_front();
+            timeInService = 0;
+        } else {
+            timeInService += interval - currIntervalTime;
+            currServiceTimeLeft -= interval - currIntervalTime;
+            currIntervalTime = interval;
+        }
     }
+
+    return lastServiceTimeLeft;
 }
 
