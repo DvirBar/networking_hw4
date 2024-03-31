@@ -22,7 +22,7 @@ public:
     double totalWaitTime;
     double totalServiceTime;
 
-    outPort(int id, double prob);
+    outPort(int id, double prob, int maxSize);
     void insertPacket(double arrivalTime);
     double deliverPackets(double intervalStart, double intervalEnd);
 };

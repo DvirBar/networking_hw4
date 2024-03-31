@@ -41,7 +41,7 @@ deque<pair<int, double>> mergeArrivals(vector<vector<pair<int, double>>> arrival
     return arrivals;
 }
 
-int simulateOutPort(double* probInOutMatrix, int inPort, int numOutPorts) {
+int simulateOutPort(vector<double> probInOutMatrix, int inPort, int numOutPorts) {
     random_device rd;
     mt19937 gen(rd());
     uniform_real_distribution<> dis(0.0,1.0);
@@ -57,7 +57,7 @@ int simulateOutPort(double* probInOutMatrix, int inPort, int numOutPorts) {
 }
 
 void processArgs(char *argv[], int* maxArrivalTime, int* numInPorts, int* numOutPorts,
-                 double* probInOutMatrix, double* inProb, int* outQueueSizes, double* outProbs) {
+                 vector<double>& probInOutMatrix, vector<double>& inProb, vector<int>& outQueueSizes, vector<double>& outProbs) {
     int currentArgIndex = 1;
     *maxArrivalTime = atoi(argv[currentArgIndex]);
     currentArgIndex++;
@@ -65,43 +65,34 @@ void processArgs(char *argv[], int* maxArrivalTime, int* numInPorts, int* numOut
     currentArgIndex++;
     *numOutPorts = atoi(argv[currentArgIndex]);
     currentArgIndex++;
-    probInOutMatrix = new double[(*numInPorts)*(*numOutPorts)];
 
-    for(int i=0; i<*numInPorts; i++) {
-        for(int j=0; j<*numOutPorts; j++) {
-            probInOutMatrix[i*(*numOutPorts)+j] = atof(argv[currentArgIndex]);
-            currentArgIndex++;
-        }
-    }
-
-    inProb = new double[*numInPorts];
-
-    for(int i=0; i<*numInPorts; i++) {
-        inProb[i] = atof(argv[currentArgIndex]);
+    for(int i=0; i<(*numInPorts)*(*numOutPorts); i++) {
+        probInOutMatrix.push_back(atof(argv[currentArgIndex]));
         currentArgIndex++;
     }
 
-    outQueueSizes = new int[*numOutPorts];
-
-    for(int i=0; i<*numOutPorts; i++) {
-        outQueueSizes[i] = atoi(argv[currentArgIndex]);
+    for(int i=0; i<*numInPorts; i++) {
+        inProb.push_back(atof(argv[currentArgIndex]));
         currentArgIndex++;
     }
 
-    outProbs = new double[*numOutPorts];
+    for(int i=0; i<*numOutPorts; i++) {
+        outQueueSizes.push_back(atoi(argv[currentArgIndex]));
+        currentArgIndex++;
+    }
 
     for(int i=0; i<*numOutPorts; i++) {
-        outProbs[i] = atof(argv[currentArgIndex]);
+        outProbs.push_back(atof(argv[currentArgIndex]));
         currentArgIndex++;
     }
 }
 
 int main(int argc, char *argv[]) {
     int maxArrivalTime, numInPorts, numOutPorts;
-    double* probInOutMatrix = nullptr;
-    double* inProb = nullptr;
-    int* outQueueSizes = nullptr;
-    double* outProbs = nullptr;
+    vector<double> probInOutMatrix;
+    vector<double> inProb;
+    vector<int> outQueueSizes;
+    vector<double> outProbs;
 
     processArgs(argv, &maxArrivalTime, &numInPorts, &numOutPorts,
                 probInOutMatrix, inProb, outQueueSizes, outProbs);
@@ -118,7 +109,7 @@ int main(int argc, char *argv[]) {
     vector<outPort> outPorts;
 
     for(int i=0; i<numOutPorts; i++) {
-        outPorts.emplace_back(i, outProbs[i]);
+        outPorts.emplace_back(i, outProbs[i], outQueueSizes[i]);
     }
 
     double maxServiceTime = 0;
@@ -177,11 +168,6 @@ int main(int argc, char *argv[]) {
     }
 
     cout << totalDuration << " " << avgWaitTime/totalDelivered << " " << avgServiceTime/totalDelivered << endl;
-
-    delete[] probInOutMatrix;
-    delete[] inProb;
-    delete[] outQueueSizes;
-    delete[] outProbs;
 
     return 0;
 }

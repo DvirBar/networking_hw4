@@ -13,7 +13,7 @@ inPort::inPort(double prob, int index, double maxArrivalTime):
 vector<pair<int, double>> inPort::simulateArrivals() {
     random_device rd;
     mt19937 gen(rd());
-    exponential_distribution<> exp(1/prob);
+    exponential_distribution<> exp(prob);
     double accumulatedTime = exp(gen);
     vector<pair<int, double>> portArrivalQueue;
 
