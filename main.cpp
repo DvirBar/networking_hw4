@@ -3,6 +3,7 @@
 #include <vector>
 #include <utility>
 #include <deque>
+#include <climits>
 #include "inPort.h"
 #include "outPort.h"
 
@@ -14,9 +15,9 @@ deque<pair<int, double>> mergeArrivals(vector<vector<pair<int, double>>> arrival
     int numFinished = 0, minIndex = -1;
     double minValue = INT_MAX;
 
-    while(numFinished < arrivalQueues.size()) {
-        for(int i=0; i<arrivalQueues.size(); i++) {
-            if(indexes[i] == arrivalQueues[i].size()) {
+    while(numFinished < (int)arrivalQueues.size()) {
+        for(int i=0; i< (int)arrivalQueues.size(); i++) {
+            if(indexes[i] == (int)arrivalQueues[i].size()) {
                 continue;
             }
 
@@ -30,7 +31,7 @@ deque<pair<int, double>> mergeArrivals(vector<vector<pair<int, double>>> arrival
         arrivals.emplace_back(minIndex, minValue);
         indexes[minIndex]++;
 
-        if(indexes[minIndex] == arrivalQueues[minIndex].size()) {
+        if(indexes[minIndex] == (int)arrivalQueues[minIndex].size()) {
             numFinished++;
         }
 
@@ -57,7 +58,7 @@ int simulateOutPort(vector<double> probInOutMatrix, int inPort, int numOutPorts)
 }
 
 void processArgs(char *argv[], int* maxArrivalTime, int* numInPorts, int* numOutPorts,
-                 vector<double>& probInOutMatrix, vector<double>& inProb, vector<int>& outQueueSizes, vector<double>& outProbs) {
+                 vector<double>& probInOutMatrix, vector<double>& inProb, vector<unsigned long>& outQueueSizes, vector<double>& outProbs) {
     int currentArgIndex = 1;
     *maxArrivalTime = atoi(argv[currentArgIndex]);
     currentArgIndex++;
@@ -77,7 +78,7 @@ void processArgs(char *argv[], int* maxArrivalTime, int* numInPorts, int* numOut
     }
 
     for(int i=0; i<*numOutPorts; i++) {
-        outQueueSizes.push_back(atoi(argv[currentArgIndex]));
+        outQueueSizes.push_back(::strtol(argv[currentArgIndex], nullptr, 10));
         currentArgIndex++;
     }
 
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
     int maxArrivalTime, numInPorts, numOutPorts;
     vector<double> probInOutMatrix;
     vector<double> inProb;
-    vector<int> outQueueSizes;
+    vector<unsigned long> outQueueSizes;
     vector<double> outProbs;
 
     processArgs(argv, &maxArrivalTime, &numInPorts, &numOutPorts,
@@ -99,7 +100,6 @@ int main(int argc, char *argv[]) {
 
     vector<vector<pair<int, double>>> arrivalQueues;
 
-    // TODO: fix the nullptr thing
     for(int i=0; i<numInPorts; i++) {
         inPort port = inPort(inProb[i], i, maxArrivalTime);
         arrivalQueues.push_back(port.simulateArrivals());

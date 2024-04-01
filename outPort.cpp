@@ -5,7 +5,7 @@
 #include "outPort.h"
 #include <random>
 
-outPort::outPort(int id, double prob, int maxSize):
+outPort::outPort(int id, double prob, unsigned long maxSize):
     prob(prob),
     outPortID(id),
     queue(),
@@ -15,11 +15,12 @@ outPort::outPort(int id, double prob, int maxSize):
     deliveredPackets(0),
     droppedPackets(0),
     totalWaitTime(0),
+    servicedArrivalTime(0),
     totalServiceTime(0)
 {}
 
 void outPort::insertPacket(double arrivalTime) {
-    if(queue.size() != 0 && queue.size()-1 > maxSize) {
+    if((int)queue.size() == maxSize) {
         droppedPackets++;
         return;
     }
@@ -36,22 +37,23 @@ double outPort::deliverPackets(double intervalStart, double intervalEnd) {
     double interval = intervalEnd - intervalStart;
     double lastServiceTimeLeft = 0;
 
-    while(currIntervalTime < interval && !queue.empty()) {
+    while(currIntervalTime < interval && (!queue.empty() || currServiceTimeLeft != -1)) {
         if(currServiceTimeLeft == -1) {
             currServiceTimeLeft = exp(gen);
+            servicedArrivalTime = queue.front();
+            queue.pop_front();
         }
 
         if(currServiceTimeLeft <= interval - currIntervalTime) {
             currIntervalTime += currServiceTimeLeft;
             lastServiceTimeLeft = currServiceTimeLeft;
-            totalWaitTime += intervalStart + currIntervalTime - queue.front();
+            totalWaitTime += intervalStart + currIntervalTime - servicedArrivalTime;
             totalServiceTime += currServiceTimeLeft + timeInService;
-            queue.pop_front();
             currServiceTimeLeft = -1;
             timeInService = 0;
         } else {
             timeInService += interval - currIntervalTime;
-            currServiceTimeLeft -= timeInService;
+            currServiceTimeLeft -= (interval - currIntervalTime);
             currIntervalTime = interval;
         }
     }

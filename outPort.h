@@ -14,15 +14,16 @@ public:
     double prob;
     int outPortID;
     deque<double> queue;
+    double servicedArrivalTime;
     double currServiceTimeLeft;
     double timeInService;
-    int maxSize;
-    int deliveredPackets;
-    int droppedPackets;
+    unsigned long maxSize;
+    unsigned long deliveredPackets;
+    unsigned long droppedPackets;
     double totalWaitTime;
     double totalServiceTime;
 
-    outPort(int id, double prob, int maxSize);
+    outPort(int id, double prob, unsigned long maxSize);
     void insertPacket(double arrivalTime);
     double deliverPackets(double intervalStart, double intervalEnd);
 };
